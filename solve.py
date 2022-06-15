@@ -81,6 +81,7 @@ def main(config_path, bandit_levels):
 
             command_string = "; ".join(commands)
             next_password = para_ssh(host, port, username, password, command_string)
+            next_password = "" if next_password is None else next_password
             print(f"Password for {bandit_levels[i+1]}: {next_password}")
             if test_ssh_login(host, port, bandit_levels[i+1], next_password):
                 print(f"{level} solved! The password for the {bandit_levels[i+1]} is correct!")
@@ -92,6 +93,6 @@ if __name__ == "__main__":
         print("Usage: python solve.py <max_level>")
     else:
         config_path = path.abspath("config")
-        bandit_levels = [f"bandit{x}" for x in range(0,int(sys.argv[1]) + 1)]
+        bandit_levels = [f"bandit{x}" for x in range(0, int(sys.argv[1]) + 1)]
         main(config_path, bandit_levels)
 
