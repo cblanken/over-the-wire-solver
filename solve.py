@@ -2,12 +2,27 @@ from paramiko import SSHClient, AutoAddPolicy, AuthenticationException, SSHExcep
 from os import path
 import json
 import sys
-
 from paramiko.pkey import PKey
+from pwn import ssh, context
+context.log_level = 'WARNING'
 
-def pwn_ssh(user, host, port, password, command_string, sshKeyPath=None):
-    # TODO implement with pwntools
-    print("Logging in with pwntools")
+def pwn_ssh(user, host, password, command_string, port=22, sshKeyPath=None):
+    try:
+        print(f"Logging into {user}...")
+        if (sshKeyPath):
+            session = ssh(user, host, port, keyfile=sshKeyPath, ignore_config=True)
+        else:
+            session = ssh(user, host, int(port), password=password, ignore_config=True)
+
+        print(f"Executing {user} commands...")
+        results = session.run_to_end(command_string)
+        next_password = results[0].decode('utf8')
+
+        session.close()
+        return next_password[:-1]
+    except Exception as e:
+        # TODO add exception handling
+        print("pwntools failed: ", e)
 
 def para_ssh(host, port, user, password, command_string, sshKeyPath=None):
     client = SSHClient()
@@ -15,6 +30,7 @@ def para_ssh(host, port, user, password, command_string, sshKeyPath=None):
     print(f"\n============= {user} =============")
     try:
         if (sshKeyPath != None):
+            # TODO pass ssh key
             print("Passing ssh key...")
         else:
             print(f"Logging into {user}...")
@@ -40,8 +56,20 @@ def para_ssh(host, port, user, password, command_string, sshKeyPath=None):
         print("paramiko failed")
         print(str(e))
 
+def test_pwn_login(user, host, password, key=None, port=22):
+    try:
+        if (key):
+            session = ssh(user, host, port, keyfile=key, ignore_config=True)
+        else:
+            session = ssh(user, host, port, password=password, ignore_config=True)
+        status = session.connected()        
+        session.close()
+        return status
+    except Exception as e:
+        # TODO add exception handling
+        print("pwntools test login failed: ", e)
 
-def test_ssh_login(host, port, user, password, key=None):
+def test_para_login(host, port, user, password, key=None):
     client = SSHClient()
     client.load_system_host_keys()
     try:
@@ -80,10 +108,12 @@ def main(config_path, bandit_levels):
             commands = cfg["commands"]
 
             command_string = "; ".join(commands)
-            next_password = para_ssh(host, port, username, password, command_string)
+            #next_password = para_ssh(host, port, username, password, command_string)
+            next_password = pwn_ssh(username, host, password, command_string, port=port)
             next_password = "" if next_password is None else next_password
             print(f"Password for {bandit_levels[i+1]}: {next_password}")
-            if test_ssh_login(host, port, bandit_levels[i+1], next_password):
+            #if test_para_login(host, port, bandit_levels[i+1], next_password):
+            if test_pwn_login(bandit_levels[i+1], host, next_password, port=port):
                 print(f"{level} solved! The password for the {bandit_levels[i+1]} is correct!")
         except KeyError:
             print(f"Config file not found for {level}, continuing to next level.")
