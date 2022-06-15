@@ -7,6 +7,7 @@ from pwn import ssh, context
 context.log_level = 'WARNING'
 
 def pwn_ssh(user, host, password, command_string, port=22, sshKeyPath=None):
+    print(f"\n============= {user} =============")
     try:
         print(f"Logging into {user}...")
         if (sshKeyPath):
@@ -95,7 +96,8 @@ def parse_cfg(filepath):
     except Exception as e:
         print(str(e))
 
-def main(config_path, bandit_levels):
+def main(config_path, bandit_levels, ssh_impl):
+    ssh_impl = ssh_impl.lower()
     next_password = "bandit0"
     for i, level in enumerate(bandit_levels[:-1]):
         cfg = parse_cfg(f"{config_path}/{level}.cfg")
@@ -108,8 +110,11 @@ def main(config_path, bandit_levels):
             commands = cfg["commands"]
 
             command_string = "; ".join(commands)
-            #next_password = para_ssh(host, port, username, password, command_string)
-            next_password = pwn_ssh(username, host, password, command_string, port=port)
+            if ssh_impl == "pwn":
+                next_password = pwn_ssh(username, host, password, command_string, port=port)
+            elif ssh_impl == "para":
+                next_password = para_ssh(host, port, username, password, command_string)
+            
             next_password = "" if next_password is None else next_password
             print(f"Password for {bandit_levels[i+1]}: {next_password}")
             #if test_para_login(host, port, bandit_levels[i+1], next_password):
@@ -119,10 +124,16 @@ def main(config_path, bandit_levels):
             print(f"Config file not found for {level}, continuing to next level.")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python solve.py <max_level>")
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print("Usage: python solve.py <max_level> [pwn | para]\n")
     else:
         config_path = path.abspath("config")
         bandit_levels = [f"bandit{x}" for x in range(0, int(sys.argv[1]) + 1)]
-        main(config_path, bandit_levels)
+
+        # Default to pwntools ssh implementation
+        ssh_impl = sys.argv[2] if len(sys.argv) > 2 else "pwn" 
+        if ssh_impl != "pwn" and ssh_impl != "para":
+            print("The ssh implementation (second argument) must be either \"pwn\" or \"para\".")
+            exit(1)
+        main(config_path, bandit_levels, ssh_impl)
 
