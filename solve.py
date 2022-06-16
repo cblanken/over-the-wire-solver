@@ -112,14 +112,16 @@ def main(config_path, bandit_levels, ssh_impl):
             command_string = "; ".join(commands)
             if ssh_impl == "pwn":
                 next_password = pwn_ssh(username, host, password, command_string, port=port)
-            elif ssh_impl == "para":
+                test_passed = test_pwn_login(bandit_levels[i+1], host, next_password, port=port)
+            else: # use paramikio ssh implementation
                 next_password = para_ssh(host, port, username, password, command_string)
+                test_passed = test_para_login(host, port, bandit_levels[i+1], next_password)
+
+            if test_passed:
+                print(f"{level} solved! The password for the {bandit_levels[i+1]} is correct!")
             
             next_password = "" if next_password is None else next_password
             print(f"Password for {bandit_levels[i+1]}: {next_password}")
-            #if test_para_login(host, port, bandit_levels[i+1], next_password):
-            if test_pwn_login(bandit_levels[i+1], host, next_password, port=port):
-                print(f"{level} solved! The password for the {bandit_levels[i+1]} is correct!")
         except KeyError:
             print(f"Config file not found for {level}, continuing to next level.")
 
@@ -131,7 +133,7 @@ if __name__ == "__main__":
         bandit_levels = [f"bandit{x}" for x in range(0, int(sys.argv[1]) + 1)]
 
         # Default to pwntools ssh implementation
-        ssh_impl = sys.argv[2] if len(sys.argv) > 2 else "pwn" 
+        ssh_impl = sys.argv[2] if len(sys.argv) > 2 else "para" 
         if ssh_impl != "pwn" and ssh_impl != "para":
             print("The ssh implementation (second argument) must be either \"pwn\" or \"para\".")
             exit(1)
