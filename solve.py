@@ -100,7 +100,7 @@ def main(config_path, bandit_levels, ssh_impl):
     ssh_impl = ssh_impl.lower()
     next_password = "bandit0"
     for i, level in enumerate(bandit_levels[:-1]):
-        cfg = parse_cfg(f"{config_path}/{level}.cfg")
+        cfg = parse_cfg(f"{config_path}/{level}.json")
         cfg = {} if cfg is None else cfg
         try:
             username = cfg["user"]
