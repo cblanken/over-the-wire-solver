@@ -1,0 +1,9 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit15",
+    "pass": "BfMYroe26WYalil77FoDi9qh59eK5xNr",
+    "commands": [
+      "(echo BfMYroe26WYalil77FoDi9qh59eK5xNr; sleep 0.1) | openssl s_client -connect localhost:30001 2>/dev/null | tail -n3 | head -n1"
+    ]
+}

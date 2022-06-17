@@ -1,0 +1,9 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit14",
+    "pass": "4wcYUJFw0k0XLShlDzztnTBHiqxU3b3e",
+    "commands": [
+      "echo 4wcYUJFw0k0XLShlDzztnTBHiqxU3b3e | nc localhost 30000 | tail -n2 | head -n1"
+    ]
+}

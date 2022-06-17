@@ -1,0 +1,9 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit13",
+    "pass": "8ZjyCRiBWFYkneahHwxCv3wb2a1ORpYL",
+    "commands": [
+      "ssh -o StrictHostKeyChecking=no -i sshkey.private bandit14@localhost -p 22 'cat /etc/bandit_pass/bandit14'"
+    ]
+}
