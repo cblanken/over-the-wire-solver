@@ -2,6 +2,7 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit9",
+    "pass": "UsvVyFSfZZWbi6wgC7dAFyFuR6jQQUhR",
     "commands": [
         "strings data.txt | grep '=====' | tail -n1 | sed 's/=//g' | sed 's/\\& //g'"
     ]

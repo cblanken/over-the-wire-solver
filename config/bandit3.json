@@ -2,6 +2,7 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit3",
+    "pass": "UmHadQclWmgdLOKQ3YNgjWxGoRMb5luK",
     "commands": [
         "cat ~/inhere/.hidden"
     ]

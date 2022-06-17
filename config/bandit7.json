@@ -2,6 +2,7 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit7",
+    "pass": "HKBPTKQnIay4Fw76bEy8PVxKEDQRKTzs",
     "commands": [
         "cat data.txt | grep millionth | awk '{print $2}'"
     ]

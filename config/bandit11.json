@@ -2,6 +2,7 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit11",
+    "pass": "IFukwKGsFW8MOq3IRFqrxE1hxTNEbUPR",
     "commands": [
         "cat data.txt | tr \"a-zA-Z\" \"nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKL\" | cut -d' ' -f4"
     ]
