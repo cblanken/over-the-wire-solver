@@ -2,10 +2,10 @@ from paramiko import SSHClient, AutoAddPolicy, AuthenticationException, SSHExcep
 from os import path
 import json
 import sys
-from paramiko.pkey import PKey
 from pwn import ssh, context
 context.log_level = 'WARNING'
 
+# TODO: implement interface for pwn and paramiko ssh for easier implementation 
 def pwn_ssh(user, host, password, command_string, port=22, sshKeyPath=None):
     print(f"\n============= {user} =============")
     try:
@@ -96,46 +96,81 @@ def parse_cfg(filepath):
     except Exception as e:
         print(str(e))
 
-def main(config_path, bandit_levels, ssh_impl):
-    ssh_impl = ssh_impl.lower()
-    next_password = "bandit0"
-    for i, level in enumerate(bandit_levels[:-1]):
-        cfg = parse_cfg(f"{config_path}/{level}.json")
-        cfg = {} if cfg is None else cfg
-        try:
-            username = cfg["user"]
-            password = next_password
-            host = cfg["host"]
-            port = cfg["port"]
-            commands = cfg["commands"]
-
-            command_string = "; ".join(commands)
-            if ssh_impl == "pwn":
-                next_password = pwn_ssh(username, host, password, command_string, port=port)
-                test_passed = test_pwn_login(bandit_levels[i+1], host, next_password, port=port)
-            else: # use paramikio ssh implementation
-                next_password = para_ssh(host, port, username, password, command_string)
-                test_passed = test_para_login(host, port, bandit_levels[i+1], next_password)
-
-            if test_passed:
-                print(f"{level} solved! The password for the {bandit_levels[i+1]} is correct!")
+def solve_level(cfg, level, password, ssh_impl):
+    # TODO add type hints
+    level_name = f"bandit{level}"
+    next_level_name = f"bandit{level+1}"
+    try:
+        command_string = "; ".join(cfg["commands"])
+        if ssh_impl == "pwn":
+            next_password = pwn_ssh(cfg["user"], cfg["host"], password, command_string, port=cfg["port"])
+            test_passed = test_pwn_login(next_level_name, cfg["host"], next_password, port=cfg["port"])
+        else: # use paramikio ssh implementation
+            next_password = para_ssh(cfg["host"], cfg["port"], cfg["user"], password, command_string)
+            test_passed = test_para_login(cfg["host"], cfg["port"], next_level_name, next_password)
             
-            next_password = "" if next_password is None else next_password
-            print(f"Password for {bandit_levels[i+1]}: {next_password}")
-        except KeyError:
-            print(f"Config file not found for {level}, continuing to next level.")
+        return (test_passed, next_password)
+    except KeyError:
+        print(f"Config file not found for {level_name}, continuing to next level.")
+        return (False, "")
+        # TODO handle exception and propogate message to use cfg['pass'] for next level pass
+
+def solve_levels(config_root, min_level, max_level, ssh_impl):
+    # TODO handle failed cfg read
+    # TODO implement retry count
+    # TODO track login/solve status for each level
+    level_statuses = []
+    ssh_impl = ssh_impl.lower()
+    cfg = parse_cfg(f"{config_root}/bandit{min_level}.json")
+    if cfg == None:
+        print(f"Could not parse {config_root}/bandit{min_level}.json")
+        print("Exiting...")
+        return level_statuses
+
+    # Validate login of min_level with password from config
+    next_password = cfg["pass"]
+    success, next_password = solve_level(cfg, min_level, next_password, ssh_impl)
+    level_statuses.append((success, next_password))
+    if not success:
+        print(f"Failed to login to bandit{min_level} with the provided password: {next_password}")
+        return level_statuses 
+    else:
+        print(f"bandit{min_level} solved! The password for bandit{min_level+1} is correct!")
+        print(f"Password for bandit{min_level+1}: {next_password}")
+        
+        # Validate subsequent levels
+        for i in range(min_level + 1, max_level + 1):
+            cfg_path = f"{config_root}/bandit{i}.json"
+            cfg = parse_cfg(cfg_path)
+            if cfg is None:
+                print(f"Failed to load {cfg_path}. Exiting...")
+                return level_statuses
+            try:
+                status = (success, next_password) = solve_level(cfg, i, next_password, ssh_impl)
+                if success:
+                    print(f"bandit{i} solved! The password for bandit{i+1} is correct!")
+                    print(f"Password for bandit{i+1}: {next_password}")
+                    level_statuses.append(status)
+                else:
+                    print(f"Failed to solve bandit{i} with the given commands.")
+                    level_statuses.append(status)
+                    return level_statuses
+            except Exception as e:
+                print(e)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print("Usage: python solve.py <max_level> [pwn | para]\n")
-    else:
-        config_path = path.abspath("config")
-        bandit_levels = [f"bandit{x}" for x in range(0, int(sys.argv[1]) + 1)]
+    if len(sys.argv) < 3 or len(sys.argv) > 4:
+        print("Usage: python solve.py <min_level> <max_level> [pwn | para]")
+        sys.exit(1)
 
-        # Default to pwntools ssh implementation
-        ssh_impl = sys.argv[2] if len(sys.argv) > 2 else "para" 
-        if ssh_impl != "pwn" and ssh_impl != "para":
-            print("The ssh implementation (second argument) must be either \"pwn\" or \"para\".")
-            exit(1)
-        main(config_path, bandit_levels, ssh_impl)
+    config_path = path.abspath("config")
+    min_level = int(sys.argv[1])
+    max_level = int(sys.argv[2])
+
+    # Default to pwntools ssh implementation
+    ssh_impl = sys.argv[3] if len(sys.argv) > 3 else "para" 
+    if ssh_impl != "pwn" and ssh_impl != "para":
+        print("The ssh implementation (second argument) must be either \"pwn\" or \"para\".")
+        exit(1)
+    solve_levels(config_path, min_level, max_level, ssh_impl)
 
