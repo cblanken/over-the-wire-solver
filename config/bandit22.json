@@ -1,0 +1,9 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit22",
+    "pass": "Yk7owGAcWjwMVRwrTesJEwB7WVOiILLI",
+    "commands": [
+        "cat /tmp/$(echo 'I am user bandit23' | md5sum | cut -d' ' -f1)"
+    ]
+}
