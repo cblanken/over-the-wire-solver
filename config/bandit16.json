@@ -1,0 +1,12 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit16",
+    "pass": "cluFn7wTiGryunymYOu4RcffSxQluehd",
+    "commands": [
+      "mkdir -p /tmp/sleifer8787",
+      "(echo 'cluFn7wTiGryunymYOu4RcffSxQluehd'; sleep 0.1)  | openssl s_client -connect localhost:31790 2>/dev/null | tail -n29 | head -n -2 > /tmp/sleifer8",
+      "chmod 600 /tmp/sleifer8787/secret.key",
+      "ssh -o StrictHostKeyChecking=no -i /tmp/sleifer8787/secret.key bandit17@localhost 'cat /etc/bandit_pass/bandit17' 2>/dev/null | tail -n1"
+    ]
+}

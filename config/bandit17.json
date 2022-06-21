@@ -1,0 +1,9 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit17",
+    "pass": "xLYVMN9WE5zQ5vHacb0sZEVqbrp7nBTn",
+    "commands": [
+      "diff passwords.old passwords.new | tail -n1 | sed 's/> //'"
+    ]
+}
