@@ -162,18 +162,20 @@ def solve_levels(config_root, min_level, max_level, ssh_impl):
                 print(e)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3 or len(sys.argv) > 4:
+    if len(sys.argv) == 2:
+        min_level = int(sys.argv[1])
+        max_level = int(sys.argv[1])
+    elif len(sys.argv) == 3 or len(sys.argv) == 4:
+        min_level = int(sys.argv[1])
+        max_level = int(sys.argv[2])
+    else:
         print("Usage: python solve.py <min_level> <max_level> [pwn | para]")
         sys.exit(1)
 
-    config_path = path.abspath("config")
-    min_level = int(sys.argv[1])
-    max_level = int(sys.argv[2])
-
     # Default to pwntools ssh implementation
+    config_path = path.abspath("config")
     ssh_impl = sys.argv[3] if len(sys.argv) > 3 else "para" 
     if ssh_impl != "pwn" and ssh_impl != "para":
         print("The ssh implementation (second argument) must be either \"pwn\" or \"para\".")
         exit(1)
     solve_levels(config_path, min_level, max_level, ssh_impl)
-
