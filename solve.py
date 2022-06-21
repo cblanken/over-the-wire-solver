@@ -6,7 +6,7 @@ from pwn import ssh, context
 context.log_level = 'WARNING'
 
 # TODO: implement interface for pwn and paramiko ssh for easier implementation 
-def pwn_ssh(user, host, password, command_string, port=22, sshKeyPath=None):
+def pwn_ssh(user, host, password, commands, port=22, sshKeyPath=None):
     print(f"\n============= {user} =============")
     try:
         print(f"Logging into {user}...")
@@ -16,7 +16,9 @@ def pwn_ssh(user, host, password, command_string, port=22, sshKeyPath=None):
             session = ssh(user, host, int(port), password=password, ignore_config=True)
 
         print(f"Executing {user} commands...")
-        results = session.run_to_end(command_string)
+        for c in commands:
+            #print (f"COMMAND: {c}")
+            results = session.run_to_end(c)
         next_password = results[0].decode('utf8')
 
         session.close()
@@ -25,7 +27,7 @@ def pwn_ssh(user, host, password, command_string, port=22, sshKeyPath=None):
         # TODO add exception handling
         print("pwntools failed: ", e)
 
-def para_ssh(host, port, user, password, command_string, sshKeyPath=None):
+def para_ssh(host, port, user, password, commands, sshKeyPath=None):
     client = SSHClient()
     client.load_system_host_keys()
     print(f"\n============= {user} =============")
@@ -39,7 +41,9 @@ def para_ssh(host, port, user, password, command_string, sshKeyPath=None):
             client.connect(host, port, user, password, allow_agent=False, look_for_keys=False)
 
             print(f"Executing {user} commands...") 
-            stdin, stdout, stderr = client.exec_command(command_string)
+            for c in commands:
+                #print (f"COMMAND: {c}")
+                stdin, stdout, stderr = client.exec_command(c)
 
             next_password = stdout.read().decode('utf8')
             # print(f"===== STDOUT =====\n{next_password}")
@@ -101,12 +105,11 @@ def solve_level(cfg, level, password, ssh_impl):
     level_name = f"bandit{level}"
     next_level_name = f"bandit{level+1}"
     try:
-        command_string = "; ".join(cfg["commands"])
         if ssh_impl == "pwn":
-            next_password = pwn_ssh(cfg["user"], cfg["host"], password, command_string, port=cfg["port"])
+            next_password = pwn_ssh(cfg["user"], cfg["host"], password, cfg["commands"], port=cfg["port"])
             test_passed = test_pwn_login(next_level_name, cfg["host"], next_password, port=cfg["port"])
         else: # use paramikio ssh implementation
-            next_password = para_ssh(cfg["host"], cfg["port"], cfg["user"], password, command_string)
+            next_password = para_ssh(cfg["host"], cfg["port"], cfg["user"], password, cfg["commands"])
             test_passed = test_para_login(cfg["host"], cfg["port"], next_level_name, next_password)
             
         return (test_passed, next_password)
