@@ -44,6 +44,7 @@ def para_ssh(host, port, user, password, commands, sshKeyPath=None):
             for c in commands:
                 #print (f"COMMAND: {c}")
                 stdin, stdout, stderr = client.exec_command(c)
+                stdout.channel.recv_exit_status() # wait for each command to complete
 
             next_password = stdout.read().decode('utf8')
             # print(f"===== STDOUT =====\n{next_password}")
