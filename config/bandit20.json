@@ -1,0 +1,12 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit20",
+    "pass": "GbKksEFF4yrVs6il55v6gwY5aVje5f0j",
+    "commands": [
+      "mkdir -p /tmp/sleifer20",
+      "echo GbKksEFF4yrVs6il55v6gwY5aVje5f0j | nc -l -p 9898 localhost &> /tmp/sleifer20/nc_out &",
+      "~/suconnect 9898 &",
+      "head -n1 /tmp/sleifer20/nc_out"
+    ]
+}

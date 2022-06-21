@@ -1,0 +1,9 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit21",
+    "pass": "gE269g2h3mw3pwgrj0Ha9Uoqen1c9DGr",
+    "commands": [
+      "cat /tmp/t7O6lds9S0RqQh9aMcz6ShpAoZKF7fgv"
+    ]
+}

@@ -1,0 +1,9 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit19",
+    "pass": "IueksS7Ubh8G3DCwVzrTd8rAVOwq3M5x",
+    "commands": [
+        "~/bandit20-do cat /etc/bandit_pass/bandit20"
+    ]
+}
