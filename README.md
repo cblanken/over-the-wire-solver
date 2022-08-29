@@ -2,6 +2,12 @@
 
 A Python program that issues commands over SSH to complete the [OverTheWire](https://overthewire.org/wargames/) Bandit wargame. A JSON file is used for each level to specify the commands required to complete the level and retrieve the password/key for the subsequent level.
 
+## Install Dependencies
+```console
+$ pip install -r requirements.txt
+```
+
+## Usage
 - The program can be run using either [`pwntools`](https://github.com/Gallopsled/pwntools) or [`paramiko`](https://github.com/paramiko/paramiko) to establish SSH connections using the optional CLI parameters `pwn` or `para`. Pwntools is the default.
 ```console
 $ python3 solve.py
