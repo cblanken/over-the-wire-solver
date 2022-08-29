@@ -1,2 +1,2 @@
 paramiko==2.11.0
-pwn==1.0
+pwntools==4.8.0
