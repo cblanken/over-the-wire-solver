@@ -1,4 +1,5 @@
-from paramiko import SSHClient, AutoAddPolicy, AuthenticationException, SSHException
+from paramiko import SSHClient, AutoAddPolicy, AuthenticationException, SSHException, Channel
+import socket
 from os import path
 import json
 import sys
@@ -17,7 +18,7 @@ def pwn_ssh(user, host, password, commands, port=22, sshKeyPath=None):
 
         print(f"Executing {user} commands...")
         for c in commands:
-            #print (f"COMMAND: {c}")
+            print (f"COMMAND: {c}")
             results = session.run_to_end(c)
         next_password = results[0].decode('utf8')
 
@@ -28,8 +29,8 @@ def pwn_ssh(user, host, password, commands, port=22, sshKeyPath=None):
         print("pwntools failed: ", e)
 
 def para_ssh(host, port, user, password, commands, sshKeyPath=None):
-    client = SSHClient()
-    client.load_system_host_keys()
+    session = SSHClient()
+    session.load_system_host_keys()
     print(f"\n============= {user} =============")
     try:
         if (sshKeyPath != None):
@@ -37,14 +38,21 @@ def para_ssh(host, port, user, password, commands, sshKeyPath=None):
             print("Passing ssh key...")
         else:
             print(f"Logging into {user}...")
-            client.set_missing_host_key_policy(AutoAddPolicy())
-            client.connect(host, port, user, password, allow_agent=False, look_for_keys=False)
+            session.set_missing_host_key_policy(AutoAddPolicy())
+            session.connect(host, port, user, password, allow_agent=False, look_for_keys=False)
 
             print(f"Executing {user} commands...") 
             for c in commands:
-                #print (f"COMMAND: {c}")
-                stdin, stdout, stderr = client.exec_command(c)
-                stdout.channel.recv_exit_status() # wait for each command to complete
+                # TODO: check for ssh keyword command to initiate another ssh connection via paramiko
+                #channel = session.invoke_shell()
+                print (f"COMMAND: {c}")
+                stdin, stdout, stderr = session.exec_command(c)
+                #stdin, stdout, stderr = channel.exec_command(c)
+                # if channel:
+                    # stdin, stdout, stderr = client_channel.exec_command(c)
+                # else:
+                    # print("Channel is borked")
+                #stdout.channel.recv_exit_status() # wait for each command to complete
 
             next_password = stdout.read().decode('utf8')
             # print(f"===== STDOUT =====\n{next_password}")
@@ -54,13 +62,13 @@ def para_ssh(host, port, user, password, commands, sshKeyPath=None):
             stderr.close()
 
             print(f"Logging out of {user}...")
-            client.close()
+            session.close()
 
             # Return password for the next level without newline
             return next_password[:-1]
-    except Exception as e:
-        print("paramiko failed")
+    except SSHException as e:
         print(str(e))
+        return ""
 
 def test_pwn_login(user, host, password, key=None, port=22):
     try:
@@ -76,22 +84,22 @@ def test_pwn_login(user, host, password, key=None, port=22):
         print("pwntools test login failed: ", e)
 
 def test_para_login(host, port, user, password, key=None):
-    client = SSHClient()
-    client.load_system_host_keys()
     try:
+        client = SSHClient()
+        client.load_system_host_keys()
         client.connect(host, port, user, password, pkey=key, allow_agent=False, look_for_keys=False)
         return True
     except AuthenticationException:
         print(f"Authentication failure. Invalid password or private key. Cannot login as {user}.")
-        return None
+        return False
     except SSHException:
-        print(f"""SSH error. Cannot connect. The connection parameters were:\n
-                \thost: {host}\n
-                \tport: {port}\n
-                \tusername: {user}\n
-                \tpassword: {password}\n
-                \tprivate key (starting with): {key[0:20]}...""")
-        return None
+        print(f"""SSH error. Cannot connect. The connection parameters were:
+        host: {host}
+        port: {port}
+        username: {user}
+        password: {password}
+        private key {key}""")
+        return False
 
 def parse_cfg(filepath):
     try:
@@ -136,7 +144,7 @@ def solve_levels(config_root, min_level, max_level, ssh_impl):
     success, next_password = solve_level(cfg, min_level, next_password, ssh_impl)
     level_statuses.append((success, next_password))
     if not success:
-        print(f"Failed to login to bandit{min_level} with the provided password: {next_password}")
+        print(f"Failed to login to bandit{min_level+1} with the provided password: {next_password}")
         return level_statuses 
     else:
         print(f"bandit{min_level} solved! The password for bandit{min_level+1} is correct!")
