@@ -4,6 +4,6 @@
     "user": "bandit9",
     "pass": "UsvVyFSfZZWbi6wgC7dAFyFuR6jQQUhR",
     "commands": [
-        "strings data.txt | grep '=====' | tail -n1 | sed 's/=//g' | sed 's/\\& //g'"
+        "strings data.txt | grep '=====' | grep -Po '[a-zA-Z0-9]+$' | tail -n1"
     ]
 }
