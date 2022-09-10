@@ -2,8 +2,8 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit9",
-    "pass": "UsvVyFSfZZWbi6wgC7dAFyFuR6jQQUhR",
+    "pass": "EN632PlfYiZbn3PhVK3XOGSlNInNE00t",
     "commands": [
-        "strings data.txt | grep '=====' | tail -n1 | sed 's/=//g' | sed 's/\\& //g'"
+        "strings data.txt | grep '=====' | grep -Po '[a-zA-Z0-9]+$' | tail -n1"
     ]
 }

@@ -2,8 +2,8 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit14",
-    "pass": "4wcYUJFw0k0XLShlDzztnTBHiqxU3b3e",
+    "pass": "fGrHPx402xGC7U7rXKDaxiWFTOiF0ENq",
     "commands": [
-      "echo 4wcYUJFw0k0XLShlDzztnTBHiqxU3b3e | nc localhost 30000 | tail -n2 | head -n1"
+      "echo fGrHPx402xGC7U7rXKDaxiWFTOiF0ENq | nc localhost 30000 | tail -n2 | head -n1"
     ]
 }

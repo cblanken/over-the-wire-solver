@@ -2,7 +2,7 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit6",
-    "pass": "DXjZPULLxYr17uwoI01bNLQbtFemEgo7",
+    "pass": "P4L4vucdmLnm8I7Vl7jG1ApGSfjYKqJU",
     "commands": [
         "find / -user 'bandit7' -group 'bandit6' -size 33c -exec cat '{}' \\; 2>/dev/null"
     ]

@@ -2,7 +2,7 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit2",
-    "pass": "CV1DtqXWVFXTvM2F0k09SHz0YwRINYA9",
+    "pass": "rRGizSaX8Mk1RTb1CNQoXTcYZWU6lgzi",
     "commands": [
         "cat '/home/bandit2/spaces in this filename'"
     ]

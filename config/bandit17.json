@@ -2,7 +2,7 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit17",
-    "pass": "xLYVMN9WE5zQ5vHacb0sZEVqbrp7nBTn",
+    "pass": "VwOSWtCA7lRKkTfbr2IDh6awj9RNZM5e",
     "commands": [
       "diff passwords.old passwords.new | tail -n1 | sed 's/> //'"
     ]
