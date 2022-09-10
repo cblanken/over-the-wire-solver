@@ -2,20 +2,21 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit12",
-    "pass": "5Te8Y4drgCRfCx8ugdwuEX8KFC6k2EUu",
+    "pass": "JVNBBFSmZwKKOP0XbFXOoW8chDz5yVRv",
     "commands": [
+        "rm -rf '/tmp/sleifer7373'",
         "mkdir -p '/tmp/sleifer7373'",
         "cp data.txt /tmp/sleifer7373/",
         "cd '/tmp/sleifer7373'",
-        "xxd -rp data.txt > f1.gz",
-        "gunzip -c f1.gz > f2.bz2",
-        "bunzip2 -c f2.bz2 > f3.gz",
-        "gunzip -c f3.gz > f4.tar",
-        "tar -xOf f4.tar > f5.tar",
-        "tar -xOf f5.tar > f6.bz2",
-        "bunzip2 -c f6.bz2 > f7.tar",
-        "tar -xOf f7.tar > f8.gz",
-        "gunzip -c f8.gz > flag",
-        "cat flag | cut -d' ' -f4"
+        "xxd -rp /tmp/sleifer7373/data.txt > /tmp/sleifer7373/f1.gz",
+        "gunzip -c /tmp/sleifer7373/f1.gz > /tmp/sleifer7373/f2.bz2",
+        "bunzip2 -c /tmp/sleifer7373/f2.bz2 > /tmp/sleifer7373/f3.gz",
+        "gunzip -c /tmp/sleifer7373/f3.gz > /tmp/sleifer7373/f4.tar",
+        "tar -xOf /tmp/sleifer7373/f4.tar > /tmp/sleifer7373/f5.tar",
+        "tar -xOf /tmp/sleifer7373/f5.tar > /tmp/sleifer7373/f6.bz2",
+        "bunzip2 -c /tmp/sleifer7373/f6.bz2 > /tmp/sleifer7373/f7.tar",
+        "tar -xOf /tmp/sleifer7373/f7.tar > /tmp/sleifer7373/f8.gz",
+        "gunzip -c /tmp/sleifer7373/f8.gz > /tmp/sleifer7373/flag",
+        "cat /tmp/sleifer7373/flag | cut -d' ' -f4"
     ]
 }

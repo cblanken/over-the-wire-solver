@@ -2,7 +2,7 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit18",
-    "pass": "kfBf3eYk5BPBRzwjqutbbfE887SVc5Yd",
+    "pass": "hga5tuuCLF6fFzUpnagiMN8ssu9LFrdg",
     "commands": [
         "cat ~/readme"
     ]

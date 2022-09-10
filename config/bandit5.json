@@ -2,7 +2,7 @@
     "host": "bandit.labs.overthewire.org",
     "port": 2220,
     "user": "bandit5",
-    "pass": "koReBOKuIDDepwhWk7jZC0RTdopnAYKh",
+    "pass": "lrIWWI6bB37kxfiCQZqUdOIYfr6eEeqR",
     "commands": [
         "head -n1 ~/inhere/maybehere07/.file2"
     ]
