@@ -1,8 +1,9 @@
-from paramiko import SSHClient, AutoAddPolicy, AuthenticationException, SSHException, Channel
 import socket
-from os import path
 import json
 import sys
+from os import path
+from time import sleep
+from paramiko import SSHClient, AutoAddPolicy, AuthenticationException, SSHException, Channel
 from pwn import ssh, context
 context.log_level = 'WARNING'
 
@@ -31,6 +32,7 @@ def pwn_ssh(user, host, password, commands, port=22, sshKeyPath=None):
 def para_ssh(host, port, user, password, commands, sshKeyPath=None):
     session = SSHClient()
     session.load_system_host_keys()
+    next_password = " "
     print(f"\n============= {user} =============")
     try:
         if (sshKeyPath != None):
@@ -62,13 +64,14 @@ def para_ssh(host, port, user, password, commands, sshKeyPath=None):
             stderr.close()
 
             print(f"Logging out of {user}...")
-            session.close()
 
             # Return password for the next level without newline
             return next_password[:-1]
     except SSHException as e:
         print(str(e))
-        return ""
+    finally:
+        session.close()
+        return next_password[:-1]
 
 def test_pwn_login(user, host, password, key=None, port=22):
     try:
@@ -77,7 +80,10 @@ def test_pwn_login(user, host, password, key=None, port=22):
         else:
             session = ssh(user, host, port, password=password, ignore_config=True)
         status = session.connected()        
+
+        print(f"Logging out of {user}...")
         session.close()
+
         return status
     except Exception as e:
         # TODO add exception handling
@@ -85,20 +91,27 @@ def test_pwn_login(user, host, password, key=None, port=22):
 
 def test_para_login(host, port, user, password, key=None):
     try:
-        client = SSHClient()
-        client.load_system_host_keys()
-        client.connect(host, port, user, password, pkey=key, allow_agent=False, look_for_keys=False)
+        print(f"Testing {user} with password: {password}")
+
+        session = SSHClient()
+        session.load_system_host_keys()
+        session.connect(host, port, user, password, pkey=key, allow_agent=False, look_for_keys=False)
+
+        print(f"Logging out of {user}...")
+        session.close()
+
         return True
     except AuthenticationException:
         print(f"Authentication failure. Invalid password or private key. Cannot login as {user}.")
         return False
-    except SSHException:
-        print(f"""SSH error. Cannot connect. The connection parameters were:
-        host: {host}
-        port: {port}
-        username: {user}
-        password: {password}
-        private key {key}""")
+    except SSHException as e:
+        print(f"SSH error. Cannot connect. The connection parameters were:")
+        print(f"\thost: {host}")
+        print(f"\tport: {port}")
+        print(f"\tusername: {user}")
+        print(f"\tpassword: {password}")
+        print(f"\tprivate key {key}")
+        print(f"\tSSHException: {e}")
         return False
 
 def parse_cfg(filepath):
@@ -114,10 +127,13 @@ def solve_level(cfg, level, password, ssh_impl):
     level_name = f"bandit{level}"
     next_level_name = f"bandit{level+1}"
     try:
-        if ssh_impl == "pwn":
+        if ssh_impl == "pwn": # use pwntools ssh implementation
             next_password = pwn_ssh(cfg["user"], cfg["host"], password, cfg["commands"], port=cfg["port"])
             test_passed = test_pwn_login(next_level_name, cfg["host"], next_password, port=cfg["port"])
-        else: # use paramikio ssh implementation
+        elif ssh_impl == "para": # use paramikio ssh implementation
+            next_password = para_ssh(cfg["host"], cfg["port"], cfg["user"], password, cfg["commands"])
+            test_passed = test_para_login(cfg["host"], cfg["port"], next_level_name, next_password)
+        else: # default to paramikio ssh implementation
             next_password = para_ssh(cfg["host"], cfg["port"], cfg["user"], password, cfg["commands"])
             test_passed = test_para_login(cfg["host"], cfg["port"], next_level_name, next_password)
             
@@ -125,50 +141,38 @@ def solve_level(cfg, level, password, ssh_impl):
     except KeyError:
         print(f"Config file not found for {level_name}, continuing to next level.")
         return (False, "")
-        # TODO handle exception and propogate message to use cfg['pass'] for next level pass
 
 def solve_levels(config_root, min_level, max_level, ssh_impl):
     # TODO handle failed cfg read
     # TODO implement retry count
-    # TODO track login/solve status for each level
     level_statuses = []
     ssh_impl = ssh_impl.lower()
-    cfg = parse_cfg(f"{config_root}/bandit{min_level}.json")
-    if cfg == None:
-        print(f"Could not parse {config_root}/bandit{min_level}.json")
-        print("Exiting...")
-        return level_statuses
+    success = False
+    next_password = None
+    for i in range(min_level, max_level + 1):
+        cfg_path = f"{config_root}/bandit{i}.json"
+        cfg = parse_cfg(cfg_path)
+        if cfg is None:
+            continue
 
-    # Validate login of min_level with password from config
-    next_password = cfg["pass"]
-    success, next_password = solve_level(cfg, min_level, next_password, ssh_impl)
-    level_statuses.append((success, next_password))
-    if not success:
-        print(f"Failed to login to bandit{min_level+1} with the provided password: {next_password}")
-        return level_statuses 
-    else:
-        print(f"bandit{min_level} solved! The password for bandit{min_level+1} is correct!")
-        print(f"Password for bandit{min_level+1}: {next_password}")
-        
-        # Validate subsequent levels
-        for i in range(min_level + 1, max_level + 1):
-            cfg_path = f"{config_root}/bandit{i}.json"
-            cfg = parse_cfg(cfg_path)
-            if cfg is None:
-                print(f"Failed to load {cfg_path}. Exiting...")
-                return level_statuses
-            try:
-                status = (success, next_password) = solve_level(cfg, i, next_password, ssh_impl)
-                if success:
-                    print(f"bandit{i} solved! The password for bandit{i+1} is correct!")
-                    print(f"Password for bandit{i+1}: {next_password}")
-                    level_statuses.append(status)
-                else:
-                    print(f"Failed to solve bandit{i} with the given commands.")
-                    level_statuses.append(status)
-                    return level_statuses
-            except Exception as e:
-                print(e)
+        if not success or next_password is None: # failed to solve previous level, so use password from cfg
+            next_password = cfg["pass"]
+
+        status = None
+        try:
+            (success, next_password) = solve_level(cfg, i, next_password, ssh_impl)
+            status = (i, success, next_password)  
+            if success:
+                print(f"bandit{i} solved! The password for bandit{i+1} is correct!")
+            else:
+                print(f"Failed to solve bandit{i}.")
+        except Exception as e:
+            print(e)
+        finally:
+            level_statuses.append(status)
+            sleep(1) # throttle to reduce server load
+
+    return level_statuses
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
@@ -180,6 +184,8 @@ if __name__ == "__main__":
     else:
         print("Usage: python solve.py <min_level> <max_level> [pwn | para]")
         sys.exit(1)
+    
+    # TODO: more comprehensive SSH error handling check paramiko and pwn docs
 
     # Default to pwntools ssh implementation
     config_path = path.abspath("config")
@@ -187,4 +193,6 @@ if __name__ == "__main__":
     if ssh_impl != "pwn" and ssh_impl != "para":
         print("The ssh implementation (second argument) must be either \"pwn\" or \"para\".")
         exit(1)
-    solve_levels(config_path, min_level, max_level, ssh_impl)
+    solve_statuses = solve_levels(config_path, min_level, max_level, ssh_impl)
+    for x in [x[:-1] for x in solve_statuses]:
+        print(x)
