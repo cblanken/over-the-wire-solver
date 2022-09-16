@@ -1,0 +1,16 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit31",
+    "pass": "OoffzGDlzhAlerFJ2cAiz1D41JW1Mhmt",
+    "commands": [
+        "mkdir -p /tmp/sleifer3131",
+        "GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -o Port=2220' git clone ssh://bandit31-git@localhost/home/bandit31-git/repo /tmp/sleifer3131/repo",
+        "#ENTER PASSWORD",
+        "CWD=/tmp/sleifer3131 echo 'May I come in?' > key.txt",
+        "git add -f key.txt",
+        "git commit 'Add key.txt'",
+        "GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -o Port=2220' git push origin master 2>&1 | grep -Po '[a-zA-Z0-9]{32}'",
+        "#ENTER PASSWORD"
+    ]
+}

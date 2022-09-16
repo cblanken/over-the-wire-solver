@@ -1,0 +1,14 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit28",
+    "pass": "AVanL161y9rsbcJIsFHuw35rjaOM19nR",
+    "commands": [
+      "mkdir -p /tmp/sleifer2828",
+      "rm -rf /tmp/sleifer2828/repo",
+      "GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -o Port=2220' git clone ssh://bandit28-git@localhost/home/bandit28-git/repo /tmp/sleifer2828/repo",
+      "#ENTER PASSWPRD",
+      "git log --all --oneline",
+      ""
+    ]
+}

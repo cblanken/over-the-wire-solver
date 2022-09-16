@@ -1,0 +1,9 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit26",
+    "pass": "5czgV9L3Xx8JPOyRbXh6lQbmIOWvPT6Z",
+    "commands": [
+        "cat ~/readme"
+    ]
+}

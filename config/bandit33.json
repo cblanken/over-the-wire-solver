@@ -1,0 +1,9 @@
+{
+    "host": "bandit.labs.overthewire.org",
+    "port": 2220,
+    "user": "bandit33",
+    "pass": "odHo63fHiFqcWWJG9rLiLDtPm45KzUKy",
+    "commands": [
+        "# bandit34 doesn't exist yet :D"
+    ]
+}
