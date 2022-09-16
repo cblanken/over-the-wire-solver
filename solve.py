@@ -1,3 +1,4 @@
+import argparse
 import socket
 import json
 import sys
@@ -6,6 +7,7 @@ from time import sleep
 from paramiko import SSHClient, AutoAddPolicy, AuthenticationException, SSHException, Channel
 from pwn import ssh, context
 context.log_level = 'WARNING'
+
 
 # TODO: implement interface for pwn and paramiko ssh for easier implementation 
 def pwn_ssh(user, host, password, commands, port=22, sshKeyPath=None):
@@ -142,9 +144,11 @@ def solve_level(cfg, level, password, ssh_impl):
         print(f"Config file not found for {level_name}, continuing to next level.")
         return (False, "")
 
-def solve_levels(config_root, min_level, max_level, ssh_impl):
+def solve_level_range(config_root, min_level, max_level, ssh_impl):
     # TODO handle failed cfg read
     # TODO implement retry count
+    if max_level is None:
+        max_level = min_level
     level_statuses = []
     ssh_impl = ssh_impl.lower()
     success = False
@@ -175,24 +179,31 @@ def solve_levels(config_root, min_level, max_level, ssh_impl):
     return level_statuses
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        min_level = int(sys.argv[1])
-        max_level = int(sys.argv[1])
-    elif len(sys.argv) == 3 or len(sys.argv) == 4:
-        min_level = int(sys.argv[1])
-        max_level = int(sys.argv[2])
-    else:
-        print("Usage: python solve.py <min_level> <max_level> [pwn | para]")
-        sys.exit(1)
-    
+    MAX_BANDIT_LEVEL = 33
+    parser = argparse.ArgumentParser(description="Solved specified OverTheWire Bandit levels.")
+    parser.add_argument('min_level', type=int,
+        help="Minimum Bandit level to solve")
+    parser.add_argument('max_level', type=int, nargs="?", default=None,
+        help="Maximum Bandit level to solve")
+    parser.add_argument('-s, --ssh', dest="ssh", nargs="?", default="para", choices=["para", "pwn"],
+        help="Specify which SSH implementation to use. (para = Paramiko, pwn = PwnTools)")
+    parser.add_argument('-v', '--verbose', action="count", default=0,
+        help="increase verbosity")
+    parser.add_argument('-c', '--config', action="count",
+        help="Directory containing JSON config files for each level")
+    args = parser.parse_args()
+
     # TODO: more comprehensive SSH error handling check paramiko and pwn docs
+
+    # TODO: verbose output option
+    # if True:
+    #     def vprint(*args, **kwargs):
+    #         print(*args, **kwargs)
+    # else:
+    #     vprint = lambda *a, **k: None
 
     # Default to pwntools ssh implementation
     config_path = path.abspath("config")
-    ssh_impl = sys.argv[3] if len(sys.argv) > 3 else "para" 
-    if ssh_impl != "pwn" and ssh_impl != "para":
-        print("The ssh implementation (second argument) must be either \"pwn\" or \"para\".")
-        exit(1)
-    solve_statuses = solve_levels(config_path, min_level, max_level, ssh_impl)
+    solve_statuses = solve_level_range(config_path, args.min_level, args.max_level, args.ssh)
     for x in [x[:-1] for x in solve_statuses]:
         print(x)
